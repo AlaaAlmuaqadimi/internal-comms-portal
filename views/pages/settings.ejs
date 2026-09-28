@@ -1,0 +1,38 @@
+<%- include('../partials/layout-start') %>
+<div class="mb-8 border-r-4 border-[#c4a56a] pr-4">
+  <h1 class="font-extrabold leading-tight text-[#14283f] text-[32px]">الإعدادات</h1>
+  <p class="mt-1 text-[#526579] text-[16px]">بيانات حسابك والحسابات المتاحة للتواصل.</p>
+</div>
+
+<section class="rounded-2xl border border-[#e3e9ef] bg-white card-shadow p-6 mb-6" aria-labelledby="profile-heading">
+  <h2 id="profile-heading" class="font-bold text-[#14283f] text-[24px] mb-5">حسابي</h2>
+  <div class="flex flex-col sm:flex-row gap-5 sm:items-center">
+    <%- include('../partials/avatar', { person: currentUser, cls: 'w-20 h-20 rounded-2xl text-2xl' }) %>
+    <dl class="grid sm:grid-cols-2 gap-x-10 gap-y-3 flex-1">
+      <div><dt class="text-[#64748b] text-[13px]">الاسم</dt><dd class="font-bold text-[#14283f]"><%= me.name %></dd></div>
+      <div><dt class="text-[#64748b] text-[13px]">اسم المستخدم</dt><dd class="font-bold text-[#14283f]" dir="ltr" style="text-align:right"><%= me.username %></dd></div>
+      <div><dt class="text-[#64748b] text-[13px]">المسمى الوظيفي</dt><dd class="font-bold text-[#14283f]"><%= me.title %></dd></div>
+      <div><dt class="text-[#64748b] text-[13px]">الإدارة</dt><dd class="font-bold text-[#14283f]"><%= me.department %></dd></div>
+      <div><dt class="text-[#64748b] text-[13px]">القسم / المكتب</dt><dd class="font-bold text-[#14283f]"><%= me.section || '—' %> / <%= me.office || '—' %></dd></div>
+      <div><dt class="text-[#64748b] text-[13px]">المنطقة</dt><dd class="font-bold text-[#14283f]"><%= me.region %></dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="rounded-2xl border border-[#e3e9ef] bg-white card-shadow p-6" aria-labelledby="contacts-heading">
+  <h2 id="contacts-heading" class="font-bold text-[#14283f] text-[24px]">الحسابات المتاحة للتواصل (<%= contacts.length %>)</h2>
+  <p class="mt-1 mb-5 text-[#526579] text-[14px]">حُدّدت هذه القائمة عند إنشاء الحساب، ولا يمكن التواصل مع أي حساب خارجها.</p>
+  <ul class="grid md:grid-cols-2 gap-3">
+    <% contacts.forEach(c => { %>
+      <li class="flex items-center gap-3 rounded-xl border border-[#e3e9ef] p-3">
+        <%- include('../partials/avatar', { person: c, cls: 'w-12 h-12 rounded-lg' }) %>
+        <div class="min-w-0 flex-1">
+          <p class="font-bold text-[#14283f] text-[15px]"><%= c.name %></p>
+          <p class="text-[#526579] text-[13px]"><%= c.title %> · <%= c.department %></p>
+        </div>
+        <a href="/call/active?contact=<%= c.id %>" class="rounded-lg px-3 py-1.5 font-bold text-white text-[14px]" style="background: rgb(23,105,163);" aria-label="اتصال بـ<%= c.name %>">اتصال</a>
+      </li>
+    <% }) %>
+  </ul>
+</section>
+<%- include('../partials/layout-end') %>

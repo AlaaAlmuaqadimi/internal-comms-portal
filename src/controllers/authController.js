@@ -1,9 +1,9 @@
 const crypto = require('crypto');
 const accountService = require('../services/accountService');
+const org = require('../services/orgService');
 const { safeNext } = require('../middleware/auth');
 
 const clean = (v, max = 100) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, max);
-const unique = (list, key) => [...new Set(list.map((p) => p[key]).filter(Boolean))];
 
 function startSession(req, user) {
   // Fresh session object (new CSRF token) on every login.
@@ -35,14 +35,16 @@ function login(req, res) {
 }
 
 function renderRegister(res, status, errors, values) {
-  const profiles = accountService.getAllProfiles();
+  const candidateGroups = org.isSelectable(values.unit)
+    ? accountService.groupByRelation(accountService.getCandidates(values.unit))
+    : null;
   res.status(status).render('pages/register', {
     title: 'إنشاء حساب',
+    active: 'directory',
     errors,
     values,
-    profiles,
-    departments: unique(profiles, 'department'),
-    regions: unique(profiles, 'region'),
+    unitGroups: org.unitOptions(),
+    candidateGroups,
   });
 }
 
@@ -50,25 +52,24 @@ function showRegister(req, res) {
   renderRegister(res, 200, [], { contacts: [] });
 }
 
+/** HTML fragment: accounts available for a given place in the hierarchy (used by the form). */
+function candidates(req, res) {
+  const unit = String(req.query.unit || '');
+  const groups = org.isSelectable(unit) ? accountService.groupByRelation(accountService.getCandidates(unit)) : null;
+  res.set('Cache-Control', 'no-store');
+  res.render('partials/candidates', { groups, selected: [] });
+}
+
 function register(req, res) {
   const b = req.body;
   const password = String(b.password || '');
-  const profiles = accountService.getAllProfiles();
-  const departments = unique(profiles, 'department');
-  const regions = unique(profiles, 'region');
-  const availableIds = new Set(profiles.map((p) => p.id));
-
-  const contacts = [...new Set([].concat(b.contacts || []).map(Number))].filter((id) => Number.isInteger(id) && availableIds.has(id));
 
   const values = {
     name: clean(b.name, 60),
     username: clean(b.username, 30),
     title: clean(b.title, 60),
-    department: clean(b.department),
-    region: clean(b.region),
-    section: clean(b.section, 60),
-    office: clean(b.office, 60),
-    contacts,
+    unit: clean(b.unit, 20),
+    contacts: accountService.parseIds(b.contacts),
   };
 
   const errors = [];
@@ -79,13 +80,23 @@ function register(req, res) {
   if (password.length > 72) errors.push('كلمة المرور طويلة جدًا (72 حرفًا كحد أقصى).');
   if (password !== String(b.confirm || '')) errors.push('تأكيد كلمة المرور غير مطابق.');
   if (values.title.length < 2) errors.push('المسمى الوظيفي مطلوب.');
-  if (!departments.includes(values.department)) errors.push('اختر الإدارة من القائمة.');
-  if (!regions.includes(values.region)) errors.push('اختر المنطقة من القائمة.');
-  if (contacts.length === 0) errors.push('اختر حسابًا واحدًا على الأقل من الحسابات التي يمكنك التواصل معها.');
+  if (!org.isSelectable(values.unit)) errors.push('اختر موقعك في الهيكل الإداري.');
 
   if (errors.length) return renderRegister(res, 400, errors, values);
 
-  const user = accountService.createUser({ ...values, password, allowedContacts: contacts });
+  // Only accounts the hierarchy allows for this position can be granted.
+  const eligible = new Set(accountService.getCandidates(values.unit).map((c) => c.id));
+  const allowedContacts = values.contacts.filter((id) => eligible.has(id));
+
+  const user = accountService.createUser({
+    name: values.name, username: values.username, title: values.title, unitId: values.unit, password, allowedContacts,
+  });
+
+  if (req.user) {
+    // An already signed-in person is adding an account: stay signed in as themselves.
+    req.session.flash = `تم إنشاء حساب «${user.name}» بنجاح.`;
+    return res.redirect('/directory');
+  }
   startSession(req, user);
   return res.redirect('/');
 }
@@ -96,4 +107,4 @@ function logout(req, res) {
   res.redirect('/login');
 }
 
-module.exports = { showLogin, login, showRegister, register, logout };
+module.exports = { showLogin, login, showRegister, candidates, register, logout };

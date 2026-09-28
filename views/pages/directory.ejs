@@ -1,10 +1,13 @@
 <%- include('../partials/layout-start') %>
-<div class="mb-8">
-  <div class="flex items-center gap-3 mb-3">
-    <span class="h-8 w-1 rounded-full bg-[#c4a56a]" aria-hidden="true"></span>
-    <h1 class="font-extrabold leading-tight text-[#14283f] text-[32px]">دليل الموظفين</h1>
+<div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <div class="flex items-center gap-3 mb-3">
+      <span class="h-8 w-1 rounded-full bg-[#c4a56a]" aria-hidden="true"></span>
+      <h1 class="font-extrabold leading-tight text-[#14283f] text-[32px]">دليل الموظفين</h1>
+    </div>
+    <p class="leading-8 max-w-3xl text-[#526579] text-[16px]">ابحث عن الزملاء واستعرض بياناتهم الوظيفية ضمن الحسابات المتاحة لك حسب الهيكل الإداري.</p>
   </div>
-  <p class="leading-8 max-w-3xl text-[#526579] text-[16px]">ابحث عن الزملاء واستعرض بياناتهم الوظيفية ضمن الحسابات المتاحة لك.</p>
+  <a href="/register" class="inline-flex items-center gap-2 rounded-xl px-5 py-3 font-bold text-white" style="background: rgb(23,105,163);"><i data-lucide="user-plus" class="w-5 h-5" aria-hidden="true"></i>إنشاء حساب جديد</a>
 </div>
 
 <section id="departments" class="rounded-2xl border border-[#e3e9ef] bg-white p-5 sm:p-6 shadow-[0_10px_35px_#14283f09] mb-6" aria-label="البحث والتصفية">
@@ -12,14 +15,13 @@
     <label for="search" class="block font-bold mb-2 text-[#14283f] text-[16px]">البحث في الدليل</label>
     <div class="relative">
       <i data-lucide="search" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#64748b] w-5 h-5 pointer-events-none"></i>
-      <input id="search" class="field !pr-12 text-[#14283f] text-[16px]" type="search" autocomplete="off" placeholder="ابحث عن موظف أو إدارة أو مكتب">
+      <input id="search" class="field !pr-12 text-[#14283f] text-[16px]" type="search" autocomplete="off" placeholder="ابحث عن موظف أو إدارة أو قسم">
     </div>
   </div>
-  <div class="border-t border-[#e3e9ef] mt-5 pt-5 grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
+  <div class="border-t border-[#e3e9ef] mt-5 pt-5 grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
     <% [
-      { id: 'department', label: 'الإدارة', all: 'كل الإدارات', list: options.departments },
+      { id: 'department', label: 'الإدارة / المكتب', all: 'كل الإدارات والمكاتب', list: options.managements },
       { id: 'section', label: 'القسم', all: 'كل الأقسام', list: options.sections },
-      { id: 'region', label: 'المنطقة', all: 'كل المناطق', list: options.regions },
       { id: 'job-title', label: 'المسمى الوظيفي', all: 'كل المسميات', list: options.titles }
     ].forEach(f => { %>
       <div>
@@ -51,8 +53,8 @@
   <div id="cards" class="grid md:grid-cols-2 2xl:grid-cols-3 gap-5">
     <% employees.forEach(e => { %>
     <article class="employee rounded-2xl border border-[#e3e9ef] p-5 shadow-sm bg-white"
-      data-name="<%= e.name %>" data-title="<%= e.title %>" data-department="<%= e.department %>" data-section="<%= e.section %>"
-      data-office="<%= e.office %>" data-region="<%= e.region %>" data-status="<%= e.status %>">
+      data-name="<%= e.name %>" data-title="<%= e.title %>" data-department="<%= e.management %>" data-section="<%= e.section %>"
+      data-unit="<%= e.unitName %>" data-status="<%= e.status %>">
       <div class="flex gap-4 items-start">
         <%- include('../partials/avatar', { person: e, cls: 'w-16 h-16 rounded-xl' }) %>
         <div class="min-w-0">
@@ -61,8 +63,8 @@
         </div>
       </div>
       <div class="border-t border-[#e3e9ef] mt-5 pt-4 space-y-2">
-        <p class="text-[#526579] text-[14px]">الإدارة: <%= e.department || '—' %></p>
-        <p class="text-[#526579] text-[14px]">المكتب: <%= e.office || '—' %></p>
+        <p class="text-[#526579] text-[14px]">الإدارة / المكتب: <%= e.management || '—' %></p>
+        <p class="text-[#526579] text-[14px]">الوحدة: <%= e.unitName || '—' %></p>
       </div>
       <div class="flex justify-between items-center gap-2 mt-5">
         <span class="<%= e.status %> flex items-center gap-2 text-sm font-bold"><span class="status-dot"></span><span class="text-[16px]"><%= e.status === 'online' ? 'متصل الآن' : 'غير متصل' %></span></span>
@@ -74,7 +76,7 @@
   <div id="empty" class="<%= employees.length ? 'hidden' : '' %> text-center rounded-2xl border border-dashed border-[#cbd7e2] p-10 mt-4 bg-white">
     <div class="mx-auto mb-4 w-12 h-12 rounded-full bg-[#eaf1f7] flex items-center justify-center text-[#1769a3]"><i data-lucide="search-x" aria-hidden="true"></i></div>
     <h2 class="font-bold text-[#14283f] text-[24px]">لا توجد نتائج مطابقة</h2>
-    <p class="mt-2 mb-5 text-[#64748b] text-[16px]">جرّب كلمات بحث أخرى أو غيّر التصفية.</p>
+    <p class="mt-2 mb-5 text-[#64748b] text-[16px]"><%= employees.length ? 'جرّب كلمات بحث أخرى أو غيّر التصفية.' : 'لا توجد حسابات متاحة لك حاليًا. يمكنك اختيار حسابات من «الإعدادات» عند توفرها.' %></p>
     <button id="empty-reset" type="button" class="rounded-lg px-5 py-2 font-bold hover:brightness-110 text-white" style="background: rgb(23,105,163);">إعادة ضبط البحث والتصفية</button>
   </div>
 </section>

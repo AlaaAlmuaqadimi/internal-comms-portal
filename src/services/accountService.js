@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { readJson, writeJson } = require('./dataService');
+const org = require('./orgService');
 
 const KEY_LEN = 64;
 const DUMMY_SALT = crypto.randomBytes(16).toString('hex');
@@ -13,10 +14,8 @@ function toProfile(a) {
     id: a.id,
     name: a.name,
     title: a.title || '',
-    department: a.department || '',
-    section: a.section || '',
-    office: a.office || '',
-    region: a.region || '',
+    unitId: a.unitId || '',
+    ...org.describe(a.unitId),
     status: a.status || 'offline',
     avatar: a.avatar || '',
     avatarAlt: a.avatarAlt || '',
@@ -62,10 +61,7 @@ function createUser(data) {
     passwordHash: derive(data.password, salt).toString('hex'),
     name: data.name,
     title: data.title,
-    department: data.department,
-    section: data.section,
-    office: data.office,
-    region: data.region,
+    unitId: data.unitId,
     status: 'online',
     avatar: '',
     avatarAlt: '',
@@ -86,10 +82,53 @@ function setStatus(id, status) {
   }
 }
 
-/** The ONLY accounts this user may see and contact. */
+const RELATION_ORDER = [
+  ['manager', 'مديرك المباشر'],
+  ['same', 'نفس المستوى الإداري (زملاء وحدتك والوحدات الشقيقة)'],
+  ['below', 'الحسابات التي تندرج أسفل وحدتك'],
+];
+
+/**
+ * Accounts a person placed in `unitId` may be allowed to contact, according to the
+ * hierarchy: their manager, the same administrative level, or anyone below them.
+ */
+function getCandidates(unitId, excludeId = null) {
+  if (!org.isSelectable(unitId)) return [];
+  const rel = org.relatives(unitId);
+  const out = [];
+  getAllProfiles().forEach((p) => {
+    if (p.id === excludeId) return;
+    let relation = null;
+    if (rel.same.has(p.unitId)) relation = 'same';
+    else if (rel.below.has(p.unitId)) relation = 'below';
+    else if (rel.manager.has(p.unitId)) relation = 'manager';
+    if (relation) out.push({ ...p, relation });
+  });
+  return out;
+}
+
+function groupByRelation(candidates) {
+  return RELATION_ORDER.map(([key, label]) => ({ key, label, items: candidates.filter((c) => c.relation === key) })).filter((g) => g.items.length);
+}
+
+const parseIds = (value) => [...new Set([].concat(value || []).map(Number))].filter(Number.isInteger);
+
+function setAllowedContacts(id, ids) {
+  const users = getUsers();
+  const user = users.find((u) => u.id === Number(id));
+  if (user) {
+    user.allowedContacts = ids;
+    writeJson('users.json', users);
+  }
+}
+
+/**
+ * The ONLY accounts this user may see and contact: what they chose AND what the
+ * hierarchy currently allows (so a stale choice can never bypass the structure).
+ */
 function getContactsFor(user) {
   const allowed = new Set(user.allowedContacts || []);
-  return getAllProfiles().filter((p) => allowed.has(p.id) && p.id !== user.id);
+  return getCandidates(user.unitId, user.id).filter((c) => allowed.has(c.id));
 }
 
 const canContact = (user, id) => getContactsFor(user).some((p) => p.id === Number(id));
@@ -104,6 +143,10 @@ module.exports = {
   burnVerify,
   createUser,
   setStatus,
+  getCandidates,
+  groupByRelation,
+  parseIds,
+  setAllowedContacts,
   getContactsFor,
   canContact,
 };

@@ -32,7 +32,7 @@
           <%- include('../partials/avatar', { person: c, cls: 'w-14 h-14 rounded-xl' }) %>
           <div class="min-w-0 flex-1">
             <h3 class="font-bold text-[#14283f] text-[16px]"><%= c.name %></h3>
-            <p class="text-[#526579] text-[13px]"><%= c.title %> · <%= c.department %></p>
+            <p class="text-[#526579] text-[13px]"><%= c.title %> · <%= c.unitName %></p>
           </div>
           <a href="/call/active?contact=<%= c.id %>" class="rounded-lg px-4 py-2 font-bold text-white text-[14px]" style="background: rgb(23,105,163);" aria-label="اتصال بـ<%= c.name %>">اتصال</a>
         </article>

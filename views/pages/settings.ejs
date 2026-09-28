@@ -12,27 +12,30 @@
       <div><dt class="text-[#64748b] text-[13px]">الاسم</dt><dd class="font-bold text-[#14283f]"><%= me.name %></dd></div>
       <div><dt class="text-[#64748b] text-[13px]">اسم المستخدم</dt><dd class="font-bold text-[#14283f]" dir="ltr" style="text-align:right"><%= me.username %></dd></div>
       <div><dt class="text-[#64748b] text-[13px]">المسمى الوظيفي</dt><dd class="font-bold text-[#14283f]"><%= me.title %></dd></div>
-      <div><dt class="text-[#64748b] text-[13px]">الإدارة</dt><dd class="font-bold text-[#14283f]"><%= me.department %></dd></div>
-      <div><dt class="text-[#64748b] text-[13px]">القسم / المكتب</dt><dd class="font-bold text-[#14283f]"><%= me.section || '—' %> / <%= me.office || '—' %></dd></div>
-      <div><dt class="text-[#64748b] text-[13px]">المنطقة</dt><dd class="font-bold text-[#14283f]"><%= me.region %></dd></div>
+      <div><dt class="text-[#64748b] text-[13px]">الإدارة / المكتب</dt><dd class="font-bold text-[#14283f]"><%= currentUser.management %></dd></div>
+      <div class="sm:col-span-2"><dt class="text-[#64748b] text-[13px]">الموقع في الهيكل الإداري</dt><dd class="font-bold text-[#14283f]"><%= currentUser.path %></dd></div>
     </dl>
   </div>
 </section>
 
 <section class="rounded-2xl border border-[#e3e9ef] bg-white card-shadow p-6" aria-labelledby="contacts-heading">
-  <h2 id="contacts-heading" class="font-bold text-[#14283f] text-[24px]">الحسابات المتاحة للتواصل (<%= contacts.length %>)</h2>
-  <p class="mt-1 mb-5 text-[#526579] text-[14px]">حُدّدت هذه القائمة عند إنشاء الحساب، ولا يمكن التواصل مع أي حساب خارجها.</p>
-  <ul class="grid md:grid-cols-2 gap-3">
-    <% contacts.forEach(c => { %>
-      <li class="flex items-center gap-3 rounded-xl border border-[#e3e9ef] p-3">
-        <%- include('../partials/avatar', { person: c, cls: 'w-12 h-12 rounded-lg' }) %>
-        <div class="min-w-0 flex-1">
-          <p class="font-bold text-[#14283f] text-[15px]"><%= c.name %></p>
-          <p class="text-[#526579] text-[13px]"><%= c.title %> · <%= c.department %></p>
-        </div>
-        <a href="/call/active?contact=<%= c.id %>" class="rounded-lg px-3 py-1.5 font-bold text-white text-[14px]" style="background: rgb(23,105,163);" aria-label="اتصال بـ<%= c.name %>">اتصال</a>
-      </li>
-    <% }) %>
-  </ul>
+  <h2 id="contacts-heading" class="font-bold text-[#14283f] text-[24px]">الحسابات المتاحة للتواصل</h2>
+  <p class="mt-1 mb-5 text-[#526579] text-[14px]">اختر من بين الحسابات المرتبطة بموقعك في الهيكل الإداري (مديرك المباشر، نفس المستوى، ومن يندرج أسفلك). لا يمكن التواصل مع أي حساب خارجها.</p>
+  <form method="post" action="/settings/contacts">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+      <div class="relative flex-1 min-w-[200px]">
+        <i data-lucide="search" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#64748b] pointer-events-none" aria-hidden="true"></i>
+        <input id="contact-search" type="search" class="field !pr-11" placeholder="ابحث في الحسابات" autocomplete="off" aria-label="ابحث في الحسابات">
+      </div>
+      <button type="button" id="select-all" class="rounded-lg px-3 py-2 border border-[#ccd9e5] font-bold text-[#1769a3] text-[14px]">تحديد الكل</button>
+      <button type="button" id="select-none" class="rounded-lg px-3 py-2 border border-[#ccd9e5] font-bold text-[#1769a3] text-[14px]">إلغاء التحديد</button>
+    </div>
+    <div id="contact-list"><%- include('../partials/candidates', { groups, selected }) %></div>
+    <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+      <p class="text-[#1769a3] font-bold" role="status" aria-live="polite">المحدد: <span id="selected-count">0</span></p>
+      <button type="submit" class="rounded-xl px-6 py-2.5 font-bold text-white" style="background: rgb(23,105,163);">حفظ التغييرات</button>
+    </div>
+  </form>
 </section>
-<%- include('../partials/layout-end') %>
+<%- include('../partials/layout-end', { scripts: ['/js/contacts-picker.js'] }) %>

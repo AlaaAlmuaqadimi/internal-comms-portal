@@ -57,9 +57,8 @@ function directoryPage(req, res) {
     active: 'directory',
     employees,
     options: {
-      departments: unique(employees, 'department'),
+      managements: unique(employees, 'management'),
       sections: unique(employees, 'section'),
-      regions: unique(employees, 'region'),
       titles: unique(employees, 'title'),
     },
   });
@@ -70,7 +69,22 @@ function notificationsPage(req, res) {
 }
 
 function settingsPage(req, res) {
-  res.render('pages/settings', { title: 'الإعدادات', active: 'settings', contacts: accountService.getContactsFor(req.user), me: req.user });
+  const candidates = accountService.getCandidates(req.user.unitId, req.user.id);
+  res.render('pages/settings', {
+    title: 'الإعدادات',
+    active: 'settings',
+    me: req.user,
+    groups: accountService.groupByRelation(candidates),
+    selected: req.user.allowedContacts || [],
+  });
 }
 
-module.exports = { callsFor, homePage, callsPage, callActivePage, directoryPage, notificationsPage, settingsPage };
+function updateContacts(req, res) {
+  const eligible = new Set(accountService.getCandidates(req.user.unitId, req.user.id).map((c) => c.id));
+  const ids = accountService.parseIds(req.body.contacts).filter((id) => eligible.has(id));
+  accountService.setAllowedContacts(req.user.id, ids);
+  req.session.flash = 'تم حفظ الحسابات المتاحة للتواصل.';
+  res.redirect('/settings');
+}
+
+module.exports = { callsFor, homePage, callsPage, callActivePage, directoryPage, notificationsPage, settingsPage, updateContacts };

@@ -1,6 +1,8 @@
 // Shared by every page: icons + toast helper.
 document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) lucide.createIcons();
+  const flash = document.getElementById('flash');
+  if (flash) window.notify(flash.dataset.message, 5000);
 });
 
 window.notify = (function () {

@@ -1,0 +1,23 @@
+<% if (!groups) { %>
+  <p class="rounded-xl border border-dashed border-[#cbd7e2] p-5 text-center text-[#526579]">اختر موقعك في الهيكل الإداري لتظهر الحسابات المتاحة لك.</p>
+<% } else if (groups.length === 0) { %>
+  <p class="rounded-xl border border-dashed border-[#cbd7e2] p-5 text-center text-[#526579]">لا توجد حاليًا حسابات مرتبطة بهذا الموقع (المدير المباشر أو نفس المستوى أو من يندرج أسفله). تظهر الحسابات الجديدة هنا تلقائيًا، ويمكنك اختيارها لاحقًا من «الإعدادات».</p>
+<% } else { %>
+  <% groups.forEach(g => { %>
+    <section class="mb-5" aria-label="<%= g.label %>">
+      <h3 class="font-bold text-[#243b53] text-[15px] mb-2"><%= g.label %> <span class="font-normal text-[#64748b]">(<%= g.items.length %>)</span></h3>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <% g.items.forEach(p => { %>
+          <label class="contact-option flex items-center gap-3 rounded-xl border border-[#e3e9ef] p-3 cursor-pointer hover:bg-[#f5f9fc]" data-search="<%= [p.name, p.title, p.unitName, p.management].join(' ') %>">
+            <input type="checkbox" name="contacts" value="<%= p.id %>" class="w-5 h-5 shrink-0 accent-[#1769a3]" <%= selected.includes(p.id) ? 'checked' : '' %>>
+            <%- include('./avatar', { person: p, cls: 'w-12 h-12 rounded-lg' }) %>
+            <span class="min-w-0">
+              <span class="block font-bold text-[#14283f] text-[15px]"><%= p.name %></span>
+              <span class="block text-[#526579] text-[13px]"><%= p.title %> · <%= p.unitName %></span>
+            </span>
+          </label>
+        <% }) %>
+      </div>
+    </section>
+  <% }) %>
+<% } %>

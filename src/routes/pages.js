@@ -10,5 +10,6 @@ router.get('/call/active', requireAuth, pages.callActivePage);
 router.get('/directory', requireAuth, pages.directoryPage);
 router.get('/notifications', requireAuth, pages.notificationsPage);
 router.get('/settings', requireAuth, pages.settingsPage);
+router.post('/settings/contacts', requireAuth, pages.updateContacts);
 
 module.exports = router;

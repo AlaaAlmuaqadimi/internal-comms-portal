@@ -3,6 +3,9 @@ const accountService = require('../services/accountService');
 /** Attaches req.user / res.locals.currentUser from the signed session cookie. */
 function loadUser(req, res, next) {
   res.locals.currentUser = null;
+  // One-time message stored by a previous request (shown as a toast).
+  res.locals.flash = (req.session && req.session.flash) || null;
+  if (res.locals.flash) req.session.flash = null;
   const id = req.session && req.session.userId;
   if (id) {
     const user = accountService.findUserById(id);

@@ -98,4 +98,26 @@
     <p id="modal-feedback" class="mt-4 text-sm text-[#1769a3] font-semibold" aria-live="polite"></p>
   </div>
 </div>
+
+<% if (kitchens.length) { %>
+<section id="kitchens" class="mt-9" aria-label="المطابخ المرتبطة بحسابك">
+  <div class="flex items-center gap-3 mb-4">
+    <span class="h-8 w-1 rounded-full bg-[#c4a56a]" aria-hidden="true"></span>
+    <h2 class="font-bold text-[#14283f] text-[24px]">المطابخ المرتبطة بحسابك</h2>
+  </div>
+  <p class="text-[#526579] text-[14px] mb-4">مرتبطة تلقائيًا بموقعك في الهيكل الإداري، ولا تحتاج اختيارها.</p>
+  <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+    <% kitchens.forEach(k => { %>
+      <article class="rounded-2xl border border-[#e9dcc2] bg-[#fbf6ec] p-5 flex items-center gap-4">
+        <%- include('../partials/avatar', { person: k, cls: 'w-14 h-14 rounded-xl' }) %>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-bold text-[#5b4515] text-[16px]"><%= k.name %></h3>
+          <p class="text-[#8a7a54] text-[13px]"><%= k.path %></p>
+        </div>
+        <a href="/call/active?contact=<%= k.id %>" class="rounded-lg px-4 py-2 font-bold text-white text-[14px]" style="background: rgb(23,105,163);" aria-label="تواصل مع <%= k.name %>">تواصل</a>
+      </article>
+    <% }) %>
+  </div>
+</section>
+<% } %>
 <%- include('../partials/layout-end', { scripts: ['/js/directory.js'] }) %>

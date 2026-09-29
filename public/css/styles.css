@@ -313,3 +313,11 @@ html {
   border-color: var(--blue);
   background: #edf5fa;
 }
+
+/* ==========================================================================
+   Kitchens (internal service contacts)
+   ========================================================================== */
+.status-dot.kitchen {
+  background: #c4a56a;
+  box-shadow: 0 0 0 3px #c4a56a20;
+}

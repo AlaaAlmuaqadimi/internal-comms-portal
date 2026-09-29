@@ -1,7 +1,16 @@
+<% if (kitchens && kitchens.length) { %>
+  <div class="rounded-xl border border-[#e9dcc2] bg-[#fbf6ec] p-4 mb-5">
+    <h3 class="font-bold text-[#7a5a1e] text-[15px] mb-2 flex items-center gap-2"><i data-lucide="chef-hat" class="w-4 h-4" aria-hidden="true"></i>سترتبط تلقائيًا بهذه المطابخ حسب موقعك</h3>
+    <ul class="space-y-1">
+      <% kitchens.forEach(k => { %><li class="text-[#5b4515] text-[14px]"><span class="font-bold"><%= k.name %></span> — <%= k.path %></li><% }) %>
+    </ul>
+    <p class="mt-2 text-[#8a7a54] text-[12px]">لا يمكن اختيار المطابخ يدويًا؛ هي جزء ثابت من الهيكل الإداري.</p>
+  </div>
+<% } %>
 <% if (!groups) { %>
   <p class="rounded-xl border border-dashed border-[#cbd7e2] p-5 text-center text-[#526579]">اختر موقعك في الهيكل الإداري لتظهر الحسابات المتاحة لك.</p>
 <% } else if (groups.length === 0) { %>
-  <p class="rounded-xl border border-dashed border-[#cbd7e2] p-5 text-center text-[#526579]">لا توجد حاليًا حسابات مرتبطة بهذا الموقع (المدير المباشر أو نفس المستوى أو من يندرج أسفله). تظهر الحسابات الجديدة هنا تلقائيًا، ويمكنك اختيارها لاحقًا من «الإعدادات».</p>
+  <p class="rounded-xl border border-dashed border-[#cbd7e2] p-5 text-center text-[#526579]">لا توجد حاليًا حسابات مرتبطة بهذا الموقع (المرتبة الأعلى بدرجة واحدة، أو نفس المستوى، أو من يندرج أسفله). تظهر الحسابات الجديدة هنا تلقائيًا، ويمكنك اختيارها لاحقًا من «الإعدادات».</p>
 <% } else { %>
   <% groups.forEach(g => { %>
     <section class="mb-5" aria-label="<%= g.label %>">

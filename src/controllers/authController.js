@@ -35,16 +35,15 @@ function login(req, res) {
 }
 
 function renderRegister(res, status, errors, values) {
-  const candidateGroups = org.isSelectable(values.unit)
-    ? accountService.groupByRelation(accountService.getCandidates(values.unit))
-    : null;
+  const selectable = org.isSelectable(values.unit);
   res.status(status).render('pages/register', {
     title: 'إنشاء حساب',
     active: 'directory',
     errors,
     values,
     unitGroups: org.unitOptions(),
-    candidateGroups,
+    candidateGroups: selectable ? accountService.groupByRelation(accountService.getCandidates(values.unit)) : null,
+    kitchens: selectable ? accountService.getKitchensForUnit(values.unit) : [],
   });
 }
 
@@ -55,9 +54,13 @@ function showRegister(req, res) {
 /** HTML fragment: accounts available for a given place in the hierarchy (used by the form). */
 function candidates(req, res) {
   const unit = String(req.query.unit || '');
-  const groups = org.isSelectable(unit) ? accountService.groupByRelation(accountService.getCandidates(unit)) : null;
+  const selectable = org.isSelectable(unit);
   res.set('Cache-Control', 'no-store');
-  res.render('partials/candidates', { groups, selected: [] });
+  res.render('partials/candidates', {
+    groups: selectable ? accountService.groupByRelation(accountService.getCandidates(unit)) : null,
+    kitchens: selectable ? accountService.getKitchensForUnit(unit) : [],
+    selected: [],
+  });
 }
 
 function register(req, res) {

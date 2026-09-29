@@ -1,31 +1,16 @@
 const dataService = require('../services/dataService');
 const accountService = require('../services/accountService');
+const org = require('../services/orgService');
 
 const unique = (list, key) => [...new Set(list.map((p) => p[key]).filter(Boolean))];
 
-/** Recent calls, restricted to contacts this user is allowed to reach. */
+/** Recent calls, restricted to contacts (people or kitchens) this user is allowed to reach. */
 function callsFor(user) {
-  const contacts = new Map(accountService.getContactsFor(user).map((c) => [c.id, c]));
+  const contacts = new Map(accountService.getAllContactsFor(user).map((c) => [String(c.id), c]));
   return dataService
     .getCalls()
-    .filter((call) => contacts.has(call.contactId))
-    .map((call) => ({ ...call, contact: contacts.get(call.contactId) }));
-}
-
-function homePage(req, res) {
-  const contacts = accountService.getContactsFor(req.user);
-  const calls = callsFor(req.user);
-  res.render('pages/home', {
-    title: 'الرئيسية',
-    active: 'home',
-    stats: {
-      contacts: contacts.length,
-      online: contacts.filter((c) => c.status === 'online').length,
-      missed: calls.filter((c) => c.type === 'missed').length,
-      unread: dataService.getNotifications().filter((n) => n.unread).length,
-    },
-    onlineContacts: contacts.filter((c) => c.status === 'online').slice(0, 6),
-  });
+    .filter((call) => contacts.has(String(call.contactId)))
+    .map((call) => ({ ...call, contact: contacts.get(String(call.contactId)) }));
 }
 
 function callsPage(req, res) {
@@ -34,28 +19,29 @@ function callsPage(req, res) {
 
 function callActivePage(req, res, next) {
   if (!req.query.contact) return res.redirect('/calls');
-  const id = Number(req.query.contact);
-  // Server-side permission check: only accounts chosen at registration.
-  if (!Number.isInteger(id) || !accountService.canContact(req.user, id)) {
-    const err = new Error('لا يمكنك التواصل مع هذا الحساب. يمكنك التواصل فقط مع الحسابات التي اخترتها عند إنشاء حسابك.');
+  const id = String(req.query.contact);
+  // Server-side permission check: only accounts allowed by the hierarchy/registration.
+  if (!accountService.canContact(req.user, id)) {
+    const err = new Error('لا يمكنك التواصل مع هذا الحساب. يمكنك التواصل فقط مع الحسابات المتاحة لك حسب موقعك في الهيكل الإداري.');
     err.status = 403;
     return next(err);
   }
-  const contacts = accountService.getContactsFor(req.user);
   return res.render('pages/call-active', {
     title: 'مكالمة صوتية',
     active: 'calls',
-    caller: contacts.find((c) => c.id === id),
-    participants: contacts.filter((c) => c.id !== id),
+    caller: accountService.findContact(req.user, id),
+    participants: accountService.getContactsFor(req.user).filter((c) => String(c.id) !== id),
   });
 }
 
 function directoryPage(req, res) {
   const employees = accountService.getContactsFor(req.user);
+  const kitchens = accountService.getKitchensFor(req.user);
   res.render('pages/directory', {
     title: 'دليل الموظفين',
     active: 'directory',
     employees,
+    kitchens,
     options: {
       managements: unique(employees, 'management'),
       sections: unique(employees, 'section'),
@@ -76,6 +62,7 @@ function settingsPage(req, res) {
     me: req.user,
     groups: accountService.groupByRelation(candidates),
     selected: req.user.allowedContacts || [],
+    kitchens: accountService.getKitchensFor(req.user),
   });
 }
 
@@ -87,4 +74,55 @@ function updateContacts(req, res) {
   res.redirect('/settings');
 }
 
-module.exports = { callsFor, homePage, callsPage, callActivePage, directoryPage, notificationsPage, settingsPage, updateContacts };
+/* ---------------------------- /org: viewable + editable chart ---------------------------- */
+
+function renderOrgNode(node) {
+  return {
+    id: node.id,
+    name: node.name,
+    kind: node.kind,
+    kitchen: node.kitchen || '',
+    inheritedKitchen: org.kitchenNameFor(node.id) || '',
+    children: node.children.map(renderOrgNode),
+  };
+}
+
+function orgPage(req, res) {
+  res.render('pages/org', { title: 'الإدارات', active: 'org', tree: renderOrgNode(org.tree()), kinds: org.KINDS });
+}
+
+function addUnit(req, res, next) {
+  try {
+    org.addUnit({ parentId: req.body.parentId, name: req.body.name, kind: req.body.kind, kitchen: req.body.kitchen });
+    req.session.flash = 'تمت إضافة الوحدة.';
+    return res.redirect('/org');
+  } catch (err) {
+    return next(err);
+  }
+}
+
+function renameUnit(req, res, next) {
+  try {
+    org.renameUnit(req.params.id, req.body.name);
+    org.setKitchen(req.params.id, req.body.kitchen);
+    req.session.flash = 'تم حفظ تعديلات الوحدة.';
+    return res.redirect('/org');
+  } catch (err) {
+    return next(err);
+  }
+}
+
+function removeUnit(req, res, next) {
+  try {
+    org.removeUnit(req.params.id, (unitId) => accountService.hasAccountAtOrBelow(unitId));
+    req.session.flash = 'تم حذف الوحدة.';
+    return res.redirect('/org');
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = {
+  callsFor, callsPage, callActivePage, directoryPage, notificationsPage, settingsPage, updateContacts,
+  orgPage, addUnit, renameUnit, removeUnit,
+};

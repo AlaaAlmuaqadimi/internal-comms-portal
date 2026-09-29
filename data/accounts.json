@@ -3,7 +3,7 @@
     "id": 1,
     "name": "أحمد سالم الورفلي",
     "title": "رئيس قسم",
-    "unitId": "u18",
+    "unitId": "u10",
     "status": "online",
     "avatar": "https://images.pexels.com/photos/8939105/pexels-photo-8939105.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "رجل يعمل في مكتب أمام حاسوب محمول"
@@ -12,7 +12,7 @@
     "id": 2,
     "name": "سارة علي النعاس",
     "title": "أخصائي خدمات",
-    "unitId": "u18",
+    "unitId": "u10",
     "status": "online",
     "avatar": "https://images.pexels.com/photos/8154925/pexels-photo-8154925.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "امرأة محجبة مبتسمة في بيئة عمل"
@@ -21,7 +21,7 @@
     "id": 3,
     "name": "محمود فتحي الزروق",
     "title": "موظف استقبال",
-    "unitId": "u51",
+    "unitId": "u26",
     "status": "offline",
     "avatar": "https://images.pexels.com/photos/14589344/pexels-photo-14589344.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "صورة مهنية لرجل يرتدي بدلة"
@@ -30,7 +30,7 @@
     "id": 4,
     "name": "ليلى عبدالسلام الترهوني",
     "title": "منسق تسجيل",
-    "unitId": "u49",
+    "unitId": "u24",
     "status": "offline",
     "avatar": "https://images.pexels.com/photos/8154425/pexels-photo-8154425.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "امرأة مبتسمة ترتدي حجابًا في مكتب"
@@ -39,7 +39,7 @@
     "id": 5,
     "name": "خالد عمر بوحليقة",
     "title": "أخصائي موارد بشرية",
-    "unitId": "u21",
+    "unitId": "u13",
     "status": "online",
     "avatar": "https://images.pexels.com/photos/7366257/pexels-photo-7366257.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "صورة شخصية لرجل يرتدي بدلة زرقاء"
@@ -48,7 +48,7 @@
     "id": 6,
     "name": "نادية إبراهيم العبيدي",
     "title": "أخصائي نظم",
-    "unitId": "u28",
+    "unitId": "u54",
     "status": "offline",
     "avatar": "https://images.pexels.com/photos/33073678/pexels-photo-33073678.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "صورة شخصية لامرأة مهنية مبتسمة"
@@ -57,7 +57,7 @@
     "id": 7,
     "name": "مريم فتحي العبيدي",
     "title": "مسؤولة المتابعة",
-    "unitId": "u2",
+    "unitId": "u1",
     "status": "offline",
     "avatar": "https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "موظفة ترتدي ملابس رسمية ونظارات في مكان عمل مضيء"
@@ -66,7 +66,7 @@
     "id": 8,
     "name": "يوسف إبراهيم المصراتي",
     "title": "أخصائي مراجعة",
-    "unitId": "u3",
+    "unitId": "u2",
     "status": "offline",
     "avatar": "https://images.pexels.com/photos/8939057/pexels-photo-8939057.jpeg?auto=compress&cs=tinysrgb&w=400",
     "avatarAlt": "موظف بملابس مهنية ونظارات في مكتب حديث"

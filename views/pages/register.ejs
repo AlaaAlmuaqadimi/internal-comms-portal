@@ -59,7 +59,7 @@
         <button type="button" id="select-all" class="rounded-lg px-3 py-2 border border-[#ccd9e5] font-bold text-[#1769a3] text-[14px]">تحديد الكل</button>
         <button type="button" id="select-none" class="rounded-lg px-3 py-2 border border-[#ccd9e5] font-bold text-[#1769a3] text-[14px]">إلغاء التحديد</button>
       </div>
-      <div id="contact-list" aria-live="polite"><%- include('../partials/candidates', { groups: candidateGroups, selected: values.contacts || [] }) %></div>
+      <div id="contact-list" aria-live="polite"><%- include('../partials/candidates', { groups: candidateGroups, kitchens, selected: values.contacts || [] }) %></div>
       <p class="mt-3 text-[#1769a3] font-bold" role="status" aria-live="polite">المحدد: <span id="selected-count">0</span></p>
     </fieldset>
 

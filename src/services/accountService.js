@@ -7,6 +7,7 @@ const DUMMY_SALT = crypto.randomBytes(16).toString('hex');
 
 const getSeedAccounts = () => readJson('accounts.json');
 const getUsers = () => readJson('users.json');
+const getKitchens = () => readJson('kitchens.json');
 
 /** Public profile: never includes credentials or the permission list. */
 function toProfile(a) {
@@ -17,12 +18,30 @@ function toProfile(a) {
     unitId: a.unitId || '',
     ...org.describe(a.unitId),
     status: a.status || 'offline',
+    isKitchen: false,
     avatar: a.avatar || '',
     avatarAlt: a.avatarAlt || '',
   };
 }
 
-/** Every account that exists: seeded employees + registered users. */
+function kitchenProfile(k) {
+  return {
+    id: k.id,
+    name: k.name,
+    title: 'خدمة تموين داخلية',
+    unitId: '',
+    unitName: '',
+    management: '',
+    section: '',
+    path: k.scope || '',
+    status: 'service',
+    isKitchen: true,
+    avatar: '',
+    avatarAlt: '',
+  };
+}
+
+/** Every human account that exists: seeded employees + registered users. */
 function getAllProfiles() {
   return [...getSeedAccounts(), ...getUsers()].map(toProfile);
 }
@@ -33,6 +52,12 @@ const findUserByUsername = (name) => {
   const n = String(name || '').trim().toLowerCase();
   return getUsers().find((u) => u.username === n) || null;
 };
+
+/** Any account (human) currently placed at this unit or below it — used before deleting a unit. */
+function hasAccountAtOrBelow(unitId) {
+  const chain = new Set([unitId]);
+  return [...getSeedAccounts(), ...getUsers()].some((a) => chain.has(a.unitId));
+}
 
 const derive = (password, salt) => crypto.scryptSync(password, salt, KEY_LEN);
 
@@ -83,14 +108,15 @@ function setStatus(id, status) {
 }
 
 const RELATION_ORDER = [
-  ['manager', 'مديرك المباشر'],
-  ['same', 'نفس المستوى الإداري (زملاء وحدتك والوحدات الشقيقة)'],
+  ['manager', 'المرتبة الأعلى بدرجة واحدة (مديرك المباشر)'],
+  ['same', 'نفس المستوى الإداري (زملاؤك ونظراؤك)'],
   ['below', 'الحسابات التي تندرج أسفل وحدتك'],
 ];
 
 /**
- * Accounts a person placed in `unitId` may be allowed to contact, according to the
- * hierarchy: their manager, the same administrative level, or anyone below them.
+ * Human accounts a person placed in `unitId` may be allowed to contact, according to
+ * the hierarchy: their manager (one rank up), the same administrative level, or
+ * anyone below them. See orgService.relatives() for the exact rule per unit kind.
  */
 function getCandidates(unitId, excludeId = null) {
   if (!org.isSelectable(unitId)) return [];
@@ -122,16 +148,30 @@ function setAllowedContacts(id, ids) {
   }
 }
 
-/**
- * The ONLY accounts this user may see and contact: what they chose AND what the
- * hierarchy currently allows (so a stale choice can never bypass the structure).
- */
+/** The kitchen(s) automatically linked to a unit's position in the hierarchy — not user-chosen. */
+function getKitchensForUnit(unitId) {
+  const kitchenName = org.kitchenNameFor(unitId);
+  if (!kitchenName) return [];
+  if (kitchenName === 'مطبخ 1 / مطبخ 2') {
+    return getKitchens().filter((k) => k.id === 'k-shared-1' || k.id === 'k-shared-2').map(kitchenProfile);
+  }
+  const match = getKitchens().find((k) => k.name === kitchenName);
+  return match ? [kitchenProfile(match)] : [];
+}
+
+/** The ONLY human accounts this user may see and contact: chosen AND currently allowed by the hierarchy. */
 function getContactsFor(user) {
   const allowed = new Set(user.allowedContacts || []);
   return getCandidates(user.unitId, user.id).filter((c) => allowed.has(c.id));
 }
 
-const canContact = (user, id) => getContactsFor(user).some((p) => p.id === Number(id));
+const getKitchensFor = (user) => getKitchensForUnit(user.unitId);
+
+/** Every contactable entity for this user: people they chose + kitchens linked automatically. */
+const getAllContactsFor = (user) => [...getContactsFor(user), ...getKitchensFor(user)];
+
+const canContact = (user, id) => getAllContactsFor(user).some((p) => String(p.id) === String(id));
+const findContact = (user, id) => getAllContactsFor(user).find((p) => String(p.id) === String(id)) || null;
 
 module.exports = {
   toProfile,
@@ -139,6 +179,7 @@ module.exports = {
   findProfile,
   findUserById,
   findUserByUsername,
+  hasAccountAtOrBelow,
   verifyPassword,
   burnVerify,
   createUser,
@@ -147,6 +188,10 @@ module.exports = {
   groupByRelation,
   parseIds,
   setAllowedContacts,
+  getKitchensForUnit,
   getContactsFor,
+  getKitchensFor,
+  getAllContactsFor,
   canContact,
+  findContact,
 };

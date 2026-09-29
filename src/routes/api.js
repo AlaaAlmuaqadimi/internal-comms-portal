@@ -7,6 +7,7 @@ router.use(requireAuthApi);
 
 router.get('/calls', api.listCalls);
 router.get('/contacts', api.listContacts);
+router.get('/kitchens', api.listKitchens);
 router.get('/notifications', api.listNotifications);
 
 module.exports = router;

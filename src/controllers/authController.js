@@ -43,7 +43,7 @@ function renderRegister(res, status, errors, values) {
     values,
     unitGroups: org.unitOptions(),
     candidateGroups: selectable ? accountService.groupByRelation(accountService.getCandidates(values.unit)) : null,
-    kitchens: selectable ? accountService.getKitchensForUnit(values.unit) : [],
+    kitchenOptions: selectable ? accountService.getKitchenOptionsForUnit(values.unit) : { type: 'none' },
   });
 }
 
@@ -58,7 +58,8 @@ function candidates(req, res) {
   res.set('Cache-Control', 'no-store');
   res.render('partials/candidates', {
     groups: selectable ? accountService.groupByRelation(accountService.getCandidates(unit)) : null,
-    kitchens: selectable ? accountService.getKitchensForUnit(unit) : [],
+    kitchenOptions: selectable ? accountService.getKitchenOptionsForUnit(unit) : { type: 'none' },
+    kitchenChoice: null,
     selected: [],
   });
 }
@@ -70,9 +71,9 @@ function register(req, res) {
   const values = {
     name: clean(b.name, 60),
     username: clean(b.username, 30),
-    title: clean(b.title, 60),
     unit: clean(b.unit, 20),
     contacts: accountService.parseIds(b.contacts),
+    kitchenChoice: clean(b.kitchenChoice, 20),
   };
 
   const errors = [];
@@ -82,8 +83,13 @@ function register(req, res) {
   if (password.length < 8) errors.push('كلمة المرور يجب ألا تقل عن 8 أحرف.');
   if (password.length > 72) errors.push('كلمة المرور طويلة جدًا (72 حرفًا كحد أقصى).');
   if (password !== String(b.confirm || '')) errors.push('تأكيد كلمة المرور غير مطابق.');
-  if (values.title.length < 2) errors.push('المسمى الوظيفي مطلوب.');
   if (!org.isSelectable(values.unit)) errors.push('اختر موقعك في الهيكل الإداري.');
+  else {
+    const kOpts = accountService.getKitchenOptionsForUnit(values.unit);
+    if (kOpts.type === 'choice' && !kOpts.options.some((o) => o.id === values.kitchenChoice)) {
+      errors.push('اختر أحد المطبخين المتاحين لموقعك.');
+    }
+  }
 
   if (errors.length) return renderRegister(res, 400, errors, values);
 
@@ -92,7 +98,8 @@ function register(req, res) {
   const allowedContacts = values.contacts.filter((id) => eligible.has(id));
 
   const user = accountService.createUser({
-    name: values.name, username: values.username, title: values.title, unitId: values.unit, password, allowedContacts,
+    name: values.name, username: values.username, unitId: values.unit, password, allowedContacts,
+    kitchenChoice: values.kitchenChoice || null,
   });
 
   if (req.user) {

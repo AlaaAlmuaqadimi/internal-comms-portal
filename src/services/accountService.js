@@ -14,7 +14,6 @@ function toProfile(a) {
   return {
     id: a.id,
     name: a.name,
-    title: a.title || '',
     unitId: a.unitId || '',
     ...org.describe(a.unitId),
     status: a.status || 'offline',
@@ -28,7 +27,6 @@ function kitchenProfile(k) {
   return {
     id: k.id,
     name: k.name,
-    title: 'خدمة تموين داخلية',
     unitId: '',
     unitName: '',
     management: '',
@@ -85,12 +83,12 @@ function createUser(data) {
     passwordSalt: salt,
     passwordHash: derive(data.password, salt).toString('hex'),
     name: data.name,
-    title: data.title,
     unitId: data.unitId,
     status: 'online',
     avatar: '',
     avatarAlt: '',
     allowedContacts: data.allowedContacts,
+    kitchenChoice: data.kitchenChoice || null,
     createdAt: new Date().toISOString(),
   };
   users.push(user);
@@ -148,15 +146,48 @@ function setAllowedContacts(id, ids) {
   }
 }
 
-/** The kitchen(s) automatically linked to a unit's position in the hierarchy — not user-chosen. */
-function getKitchensForUnit(unitId) {
+const SHARED_KITCHEN_NAME = 'مطبخ 1 / مطبخ 2';
+
+/**
+ * What kitchen(s) apply to a unit's position in the hierarchy:
+ *  - 'none':  no kitchen tag found anywhere above this unit
+ *  - 'fixed': exactly one kitchen serves it (regional directorates) — not a choice
+ *  - 'choice': it falls under the two shared kitchens — the account holder picks one
+ */
+function getKitchenOptionsForUnit(unitId) {
   const kitchenName = org.kitchenNameFor(unitId);
-  if (!kitchenName) return [];
-  if (kitchenName === 'مطبخ 1 / مطبخ 2') {
-    return getKitchens().filter((k) => k.id === 'k-shared-1' || k.id === 'k-shared-2').map(kitchenProfile);
+  if (!kitchenName) return { type: 'none' };
+  if (kitchenName === SHARED_KITCHEN_NAME) {
+    const options = getKitchens().filter((k) => k.id === 'k-shared-1' || k.id === 'k-shared-2').map(kitchenProfile);
+    return { type: 'choice', options };
   }
   const match = getKitchens().find((k) => k.name === kitchenName);
-  return match ? [kitchenProfile(match)] : [];
+  return match ? { type: 'fixed', kitchen: kitchenProfile(match) } : { type: 'none' };
+}
+
+const isValidKitchenChoice = (unitId, id) => {
+  const opts = getKitchenOptionsForUnit(unitId);
+  return opts.type === 'choice' && opts.options.some((o) => o.id === id);
+};
+
+/** The kitchen(s) actually linked to this user right now (their pick, or the fixed one). */
+function getKitchensForUnit(unitId, chosenId = null) {
+  const opts = getKitchenOptionsForUnit(unitId);
+  if (opts.type === 'none') return [];
+  if (opts.type === 'fixed') return [opts.kitchen];
+  const chosen = opts.options.find((o) => o.id === chosenId) || opts.options[0];
+  return [chosen];
+}
+
+function setKitchenChoice(userId, kitchenId) {
+  const users = getUsers();
+  const user = users.find((u) => u.id === Number(userId));
+  if (user && isValidKitchenChoice(user.unitId, kitchenId)) {
+    user.kitchenChoice = kitchenId;
+    writeJson('users.json', users);
+    return true;
+  }
+  return false;
 }
 
 /** The ONLY human accounts this user may see and contact: chosen AND currently allowed by the hierarchy. */
@@ -165,7 +196,7 @@ function getContactsFor(user) {
   return getCandidates(user.unitId, user.id).filter((c) => allowed.has(c.id));
 }
 
-const getKitchensFor = (user) => getKitchensForUnit(user.unitId);
+const getKitchensFor = (user) => getKitchensForUnit(user.unitId, user.kitchenChoice);
 
 /** Every contactable entity for this user: people they chose + kitchens linked automatically. */
 const getAllContactsFor = (user) => [...getContactsFor(user), ...getKitchensFor(user)];
@@ -188,6 +219,9 @@ module.exports = {
   groupByRelation,
   parseIds,
   setAllowedContacts,
+  getKitchenOptionsForUnit,
+  isValidKitchenChoice,
+  setKitchenChoice,
   getKitchensForUnit,
   getContactsFor,
   getKitchensFor,

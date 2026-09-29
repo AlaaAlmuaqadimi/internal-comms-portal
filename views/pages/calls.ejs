@@ -35,13 +35,12 @@
       const c = call.contact;
       const color = call.type === 'incoming' ? '#1769a3' : call.type === 'outgoing' ? '#236b56' : '#a44830';
     %>
-    <article data-type="<%= call.type %>" data-search="<%= [c.name, c.title, c.unitName, c.management].join(' ') %>" class="call-row bg-white border border-[#e3e9ef] <%= call.type === 'missed' ? 'border-r-4 border-r-[#b65b41]' : '' %> rounded-2xl p-4 sm:p-5">
+    <article data-type="<%= call.type %>" data-search="<%= [c.name, c.unitName, c.management].join(' ') %>" class="call-row bg-white border border-[#e3e9ef] <%= call.type === 'missed' ? 'border-r-4 border-r-[#b65b41]' : '' %> rounded-2xl p-4 sm:p-5">
       <div class="flex flex-col md:flex-row md:items-center gap-4">
         <div class="flex items-start sm:items-center gap-4 min-w-0 flex-1">
           <%- include('../partials/avatar', { person: c, cls: 'w-14 h-14 sm:w-16 sm:h-16 rounded-xl' }) %>
           <div class="min-w-0">
             <h2 class="font-bold text-[#14283f] text-[18px]"><%= c.name %></h2>
-            <p class="text-[#1769a3] text-[14px]"><%= c.title %></p>
             <p class="text-[#526579] text-[14px]"><%= c.unitName %></p>
           </div>
         </div>

@@ -14,7 +14,6 @@
           <div class="min-w-0 flex-1 pt-1">
             <p class="text-[#64748b] text-[14px]"><%= caller.isKitchen ? 'التواصل مع' : 'الموظف المتصل' %></p>
             <h2 class="font-bold leading-snug mt-1 text-[#14283f] text-[23px]"><%= caller.name %></h2>
-            <p class="mt-1 font-semibold text-[#1769a3] text-[16px]"><%= caller.title %></p>
             <p class="mt-1 text-[#526579] text-[16px]"><%= caller.unitName %></p>
           </div>
           <div class="flex items-center gap-2 rounded-full px-4 py-2 shrink-0" style="background: <%= caller.isKitchen ? '#f4ede0' : '#eaf6f1' %>;">
@@ -106,7 +105,7 @@
     <p class="mt-2 mb-5 text-[#526579] text-[16px]">اختر أحد الحسابات المتاحة لك لعرض حالة الاختيار في المعاينة.</p>
     <div class="space-y-2">
       <% participants.forEach(p => { %>
-        <button type="button" data-person="<%= p.name %>" class="person w-full text-right rounded-xl border border-[#dbe4ec] p-4 hover:bg-[#edf5fa] focus:bg-[#edf5fa]"><span class="font-bold text-[#14283f]"><%= p.name %> · <%= p.title %></span></button>
+        <button type="button" data-person="<%= p.name %>" class="person w-full text-right rounded-xl border border-[#dbe4ec] p-4 hover:bg-[#edf5fa] focus:bg-[#edf5fa]"><span class="font-bold text-[#14283f]"><%= p.name %></span></button>
       <% }) %>
       <% if (participants.length === 0) { %><p class="text-[#526579]">لا توجد حسابات أخرى متاحة لك.</p><% } %>
     </div>

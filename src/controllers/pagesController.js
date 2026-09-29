@@ -45,7 +45,6 @@ function directoryPage(req, res) {
     options: {
       managements: unique(employees, 'management'),
       sections: unique(employees, 'section'),
-      titles: unique(employees, 'title'),
     },
   });
 }
@@ -62,8 +61,18 @@ function settingsPage(req, res) {
     me: req.user,
     groups: accountService.groupByRelation(candidates),
     selected: req.user.allowedContacts || [],
-    kitchens: accountService.getKitchensFor(req.user),
+    kitchenOptions: accountService.getKitchenOptionsForUnit(req.user.unitId),
+    kitchenChoice: req.user.kitchenChoice || null,
   });
+}
+
+function updateKitchenChoice(req, res) {
+  if (accountService.setKitchenChoice(req.user.id, req.body.kitchenChoice)) {
+    req.session.flash = 'تم حفظ اختيار المطبخ.';
+  } else {
+    req.session.flash = 'تعذّر حفظ هذا الاختيار.';
+  }
+  res.redirect('/settings');
 }
 
 function updateContacts(req, res) {
@@ -123,6 +132,6 @@ function removeUnit(req, res, next) {
 }
 
 module.exports = {
-  callsFor, callsPage, callActivePage, directoryPage, notificationsPage, settingsPage, updateContacts,
+  callsFor, callsPage, callActivePage, directoryPage, notificationsPage, settingsPage, updateContacts, updateKitchenChoice,
   orgPage, addUnit, renameUnit, removeUnit,
 };

@@ -21,8 +21,7 @@
   <div class="border-t border-[#e3e9ef] mt-5 pt-5 grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
     <% [
       { id: 'department', label: 'الإدارة / المكتب', all: 'كل الإدارات والمكاتب', list: options.managements },
-      { id: 'section', label: 'القسم', all: 'كل الأقسام', list: options.sections },
-      { id: 'job-title', label: 'المسمى الوظيفي', all: 'كل المسميات', list: options.titles }
+      { id: 'section', label: 'القسم', all: 'كل الأقسام', list: options.sections }
     ].forEach(f => { %>
       <div>
         <label for="<%= f.id %>" class="block font-semibold mb-1.5 text-[#243b53] text-[16px]"><%= f.label %></label>
@@ -53,14 +52,13 @@
   <div id="cards" class="grid md:grid-cols-2 2xl:grid-cols-3 gap-5">
     <% employees.forEach(e => { %>
     <article class="employee rounded-2xl border border-[#e3e9ef] p-5 shadow-sm bg-white"
-      data-name="<%= e.name %>" data-title="<%= e.title %>" data-department="<%= e.management %>" data-section="<%= e.section %>"
+      data-name="<%= e.name %>" data-department="<%= e.management %>" data-section="<%= e.section %>"
       data-unit="<%= e.unitName %>" data-status="<%= e.status %>">
       <div class="flex gap-4 items-start">
         <%- include('../partials/avatar', { person: e, cls: 'w-16 h-16 rounded-xl' }) %>
         <div class="min-w-0">
           <h2 class="font-bold leading-snug text-[#14283f] text-[18px]"><%= e.name %></h2>
-          <p class="mt-1 text-[#1769a3] text-[16px]"><%= e.title %></p>
-        </div>
+          </div>
       </div>
       <div class="border-t border-[#e3e9ef] mt-5 pt-4 space-y-2">
         <p class="text-[#526579] text-[14px]">الإدارة / المكتب: <%= e.management || '—' %></p>

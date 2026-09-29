@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const cards = [...document.querySelectorAll('.employee')];
   const search = document.getElementById('search');
-  const filters = ['department', 'section', 'job-title', 'status'].map((id) => document.getElementById(id));
+  const filters = ['department', 'section', 'status'].map((id) => document.getElementById(id));
   const count = document.getElementById('count');
   const empty = document.getElementById('empty');
   const loading = document.getElementById('loading');
@@ -12,15 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function render() {
     const query = search.value.trim().toLocaleLowerCase('ar');
-    const [department, section, title, status] = filters.map((el) => el.value);
+    const [department, section, status] = filters.map((el) => el.value);
     let visible = 0;
     cards.forEach((card) => {
       const d = card.dataset;
       const matches =
-        (!query || [d.name, d.title, d.department, d.unit].some((v) => v.toLocaleLowerCase('ar').includes(query))) &&
+        (!query || [d.name, d.department, d.unit].some((v) => v.toLocaleLowerCase('ar').includes(query))) &&
         (!department || d.department === department) &&
         (!section || d.section === section) &&
-        (!title || d.title === title) &&
         (!status || d.status === status);
       card.hidden = !matches;
       if (matches) visible++;

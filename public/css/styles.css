@@ -321,3 +321,17 @@ html {
   background: #c4a56a;
   box-shadow: 0 0 0 3px #c4a56a20;
 }
+
+/* ==========================================================================
+   Contact/candidate filter chips (register + settings)
+   ========================================================================== */
+.relation-filter {
+  border-color: #dbe4ec;
+  color: #526579;
+  background: #fff;
+}
+.relation-filter.active {
+  background: #1769a3;
+  border-color: #1769a3;
+  color: #fff;
+}

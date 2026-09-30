@@ -335,3 +335,28 @@ html {
   border-color: #1769a3;
   color: #fff;
 }
+
+/* ==========================================================================
+   Org chart tree lines (/org)
+   ========================================================================== */
+.org-tree .org-children {
+  position: relative;
+  padding-inline-start: 28px;
+  margin-inline-start: 13px;
+  border-inline-start: 2px solid #d7e1ea;
+}
+.org-tree .org-children > .org-node {
+  position: relative;
+}
+.org-tree .org-children > .org-node > .org-row::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  inset-inline-start: -28px;
+  width: 28px;
+  height: 2px;
+  background: #d7e1ea;
+}
+.org-tree .org-children > .org-node:last-child {
+  padding-block-end: 2px;
+}

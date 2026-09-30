@@ -4,12 +4,10 @@ const kindLabels = { office: 'مكتب', directorate: 'إدارة', section: 'ق
 const canEdit = node.kind !== 'root' && node.kind !== 'group';
 const canHaveChildren = node.kind !== 'section';
 %>
-<div class="org-node" style="margin-inline-start: <%= depth * 22 %>px;">
-  <div class="flex flex-wrap items-center gap-2 rounded-xl border border-[#e3e9ef] bg-white px-4 py-3 mb-2">
+<div class="org-node">
+  <div class="org-row flex flex-wrap items-center gap-2 rounded-xl border border-[#e3e9ef] bg-white px-4 py-3 mb-2">
     <span aria-hidden="true"><%= icons[node.kind] || '•' %></span>
     <span class="font-bold text-[#14283f] text-[15px]"><%= node.name %></span>
-    <% if (node.kitchen) { %><span class="rounded-full px-2.5 py-0.5 text-[12px] font-bold" style="background:#fbf6ec;color:#8a6a2f;">🍳 <%= node.kitchen %></span>
-    <% } else if (node.inheritedKitchen) { %><span class="rounded-full px-2.5 py-0.5 text-[12px]" style="background:#f2f5f8;color:#7a8798;">🍳 موروث: <%= node.inheritedKitchen %></span><% } %>
     <span class="mr-auto flex items-center gap-2">
       <% if (canHaveChildren) { %><button type="button" class="edit-toggle text-[13px] font-bold text-[#1769a3]" data-target="add-<%= node.id %>">+ إضافة تابعة</button><% } %>
       <% if (canEdit) { %><button type="button" class="edit-toggle text-[13px] font-bold text-[#1769a3]" data-target="edit-<%= node.id %>">تعديل</button><% } %>
@@ -17,7 +15,7 @@ const canHaveChildren = node.kind !== 'section';
   </div>
 
   <% if (canEdit) { %>
-  <form id="edit-<%= node.id %>" hidden method="post" action="/org/units/<%= node.id %>" class="mb-3 rounded-xl border border-[#dbe4ec] bg-[#f8fafc] p-4 grid sm:grid-cols-[1fr_1fr_auto_auto] gap-2 items-end" style="margin-inline-start: <%= depth * 22 %>px;">
+  <form id="edit-<%= node.id %>" hidden method="post" action="/org/units/<%= node.id %>" class="mb-3 rounded-xl border border-[#dbe4ec] bg-[#f8fafc] p-4 grid sm:grid-cols-[1fr_1fr_auto_auto] gap-2 items-end">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div><label class="block text-[12px] font-bold text-[#526579] mb-1">الاسم</label><input name="name" class="field !h-10" value="<%= node.name %>" required></div>
     <div><label class="block text-[12px] font-bold text-[#526579] mb-1">مطبخ خاص (اختياري)</label><input name="kitchen" class="field !h-10" value="<%= node.kitchen %>" placeholder="اتركه فارغًا للوراثة من الأعلى"></div>
@@ -27,7 +25,7 @@ const canHaveChildren = node.kind !== 'section';
   <% } %>
 
   <% if (canHaveChildren) { %>
-  <form id="add-<%= node.id %>" hidden method="post" action="/org/units" class="mb-3 rounded-xl border border-dashed border-[#cbd7e2] bg-[#f8fafc] p-4 grid sm:grid-cols-[1fr_140px_1fr_auto] gap-2 items-end" style="margin-inline-start: <%= (depth + 1) * 22 %>px;">
+  <form id="add-<%= node.id %>" hidden method="post" action="/org/units" class="mb-3 rounded-xl border border-dashed border-[#cbd7e2] bg-[#f8fafc] p-4 grid sm:grid-cols-[1fr_140px_1fr_auto] gap-2 items-end">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <input type="hidden" name="parentId" value="<%= node.id %>">
     <div><label class="block text-[12px] font-bold text-[#526579] mb-1">اسم الوحدة الجديدة</label><input name="name" class="field !h-10" required placeholder="مثال: قسم جديد"></div>
@@ -41,7 +39,11 @@ const canHaveChildren = node.kind !== 'section';
   </form>
   <% } %>
 
-  <% node.children.forEach(child => { %>
-    <%- include('./org-node', { node: child, depth: depth + 1, csrfToken, kinds }) %>
-  <% }) %>
+  <% if (node.children.length) { %>
+    <div class="org-children">
+      <% node.children.forEach(child => { %>
+        <%- include('./org-node', { node: child, csrfToken, kinds }) %>
+      <% }) %>
+    </div>
+  <% } %>
 </div>

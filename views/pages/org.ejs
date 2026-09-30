@@ -12,8 +12,8 @@
   <p class="leading-7 text-[#27455b] text-[16px]">مديرو الإدارات (🏢) يتواصلون تلقائيًا مع رئيس المصلحة ونائبه (مرتبة أعلى بدرجة واحدة) ومع بقية مديري الإدارات (نفس المستوى)، أيًا كان فرع المكتب الذي تتبعه الإدارة في الشكل. لا يمكن حذف وحدة بها حسابات؛ انقل الحسابات أولًا من صفحة التسجيل أو الإعدادات.</p>
 </section>
 
-<div id="org-tree">
-  <%- include('../partials/org-node', { node: tree, depth: 0, csrfToken, kinds }) %>
+<div id="org-tree" class="org-tree">
+  <%- include('../partials/org-node', { node: tree, csrfToken, kinds }) %>
 </div>
 
 <%- include('../partials/layout-end', { scripts: ['/js/org.js'] }) %>

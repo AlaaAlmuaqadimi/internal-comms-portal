@@ -99,8 +99,7 @@ function kitchenNameFor(id) {
 function unitOptions() {
   const nbsp = '\u00A0\u00A0';
   const walk = (node, depth, out) => {
-    const kitchen = kitchenNameFor(node.id);
-    out.push({ id: node.id, label: nbsp.repeat(depth) + node.name + (kitchen ? ` — ${kitchen}` : '') });
+    out.push({ id: node.id, label: nbsp.repeat(depth) + node.name });
     node.children.filter((c) => !isGroup(c)).forEach((c) => walk(c, depth + 1, out));
   };
   const top = [];
